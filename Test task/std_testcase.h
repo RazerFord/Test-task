@@ -12,24 +12,24 @@
  */
 
 #ifdef _WIN32
- /* Ensure the CRT does not disable the "insecure functions"
-  * Ensure not to generate warnings about ANSI C functions.
-  */
+/* Ensure the CRT does not disable the "insecure functions"
+ * Ensure not to generate warnings about ANSI C functions.
+ */
 #define _CRT_SECURE_NO_DEPRECATE 1
 #define _CRT_SECURE_NO_WARNING 1
 
-  /* We do not use _malloca as it sometimes allocates memory on the heap and we
-   * do not want this to happen in test cases that expect stack-allocated memory
-   * Also, _alloca_s cannot be used as it is deprecated and has been replaced
-   * with _malloca */
+ /* We do not use _malloca as it sometimes allocates memory on the heap and we
+  * do not want this to happen in test cases that expect stack-allocated memory
+  * Also, _alloca_s cannot be used as it is deprecated and has been replaced
+  * with _malloca */
 #define ALLOCA _alloca
 
-   /* disable warnings about use of POSIX names for functions like execl()
-    Visual Studio wants you to use the ISO C++ name, such as _execl() */
+  /* disable warnings about use of POSIX names for functions like execl()
+   Visual Studio wants you to use the ISO C++ name, such as _execl() */
 #pragma warning(disable:4996)
 
 #else
- /* Linux/GNU wants this macro, otherwise stdint.h and limits.h are mostly useless */
+/* Linux/GNU wants this macro, otherwise stdint.h and limits.h are mostly useless */
 # define __STDC_LIMIT_MACROS 1
 
 #define ALLOCA alloca
@@ -42,14 +42,18 @@
 #include <limits.h>
 #include <string.h>
 #include <stdint.h>
+
 #ifndef _WIN32
 /* SIZE_MAX, int64_t, etc. are in this file on Linux */
 # include <stdint.h>
+
 #endif
+
 #include <ctype.h>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
 #ifdef _WIN32
 #include <io.h> /* for open/close etc */
 #else
@@ -57,22 +61,20 @@
 # define __STDC_LIMIT_MACROS 1
 
 #define ALLOCA alloca
-#endi
 #endif
 
 #ifdef __cplusplus
+
 #include <new> // for placement new
 
 /* classes used in some test cases as a custom type */
-class TwoIntsClass
-{
+class TwoIntsClass {
 public: // Needed to access variables from label files
     int intOne;
     int intTwo;
 };
 
-class OneIntClass
-{
+class OneIntClass {
 public: // Needed to access variables from label files
     int intOne;
 };
@@ -99,8 +101,7 @@ public: // Needed to access variables from label files
 #define RAND64() ((int64_t)(rand() & 1 ? URAND63() : -URAND63() - 1))
 
 /* struct used in some test cases as a custom type */
-typedef struct _twoIntsStruct
-{
+typedef struct _twoIntsStruct {
     int intOne;
     int intTwo;
 } twoIntsStruct;
@@ -109,24 +110,21 @@ typedef struct _twoIntsStruct
 extern "C" {
 #endif
 
-    /* The variables below are declared "const", so a tool should
-       be able to identify that reads of these will always return their
-       initialized values. */
-    extern const int GLOBAL_CONST_TRUE; /* true */
-    extern const int GLOBAL_CONST_FALSE; /* false */
-    extern const int GLOBAL_CONST_FIVE; /* 5 */
+/* The variables below are declared "const", so a tool should
+   be able to identify that reads of these will always return their
+   initialized values. */
+extern const int GLOBAL_CONST_TRUE; /* true */
+extern const int GLOBAL_CONST_FALSE; /* false */
+extern const int GLOBAL_CONST_FIVE; /* 5 */
 
-    /* The variables below are not defined as "const", but are never
-       assigned any other value, so a tool should be able to identify that
-       reads of these will always return their initialized values. */
-    extern int globalTrue; /* true */
-    extern int globalFalse; /* false */
-    extern int globalFive; /* 5 */
+/* The variables below are not defined as "const", but are never
+   assigned any other value, so a tool should be able to identify that
+   reads of these will always return their initialized values. */
+extern int globalTrue; /* true */
+extern int globalFalse; /* false */
+extern int globalFive; /* 5 */
 
 #ifdef __cplusplus
 }
 #endif
-
-
 #endif
-

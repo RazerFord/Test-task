@@ -3,99 +3,79 @@
 #include <wchar.h>
 
 #ifdef _WIN32
+#include <windows.h>
 #define FILENAME "C:\\temp\\file.txt"
 #endif
+#ifdef __linux__
 
-#include <windows.h>
+#include <dlfcn.h>
+
+#define FILENAME "/tmp/file.txt"
+#endif
 
 
-void CWE114_Process_Control__w32_char_file_01_bad()
-{
-    char* data;
-
+void CWE114_Process_Control__w32_char_file_01_bad() {
+    char *data;
 
     char buff[100] = "";
 
-    HANDLE hFile;
-    DWORD lpNumberOfBytesRead;
+    FILE *hFile;
+    unsigned long lpNumberOfBytesRead;
 
-    hFile = CreateFileA(
-        FILENAME,
-        GENERIC_READ,
-        0, NULL,
-        OPEN_ALWAYS,
-        FILE_ATTRIBUTE_NORMAL,
-        NULL);
+    hFile = fopen(FILENAME, "a+t");
 
-    if (hFile == INVALID_HANDLE_VALUE)
-    {
-        MessageBox(NULL, TEXT("Cannot open file"), TEXT("Warning"), MB_OK);
+    if (hFile == NULL) {
+        printf("Cannot open file\n");
         return;
     }
-    do
-    {
-        ReadFile(
-            hFile,
-            buff, sizeof(buff), &lpNumberOfBytesRead, NULL);
-        if (lpNumberOfBytesRead == 0)
-            break;
+    do {
+        lpNumberOfBytesRead = fread(buff, sizeof(char), sizeof(buff), hFile);
+    } while (lpNumberOfBytesRead == sizeof(buff));
 
-    } while (lpNumberOfBytesRead != 0);
-
-    CloseHandle(hFile);
+    fclose(hFile);
 
     data = buff;
 
-
     {
-        HMODULE hModule;
+        void *hModule = NULL;
         /* POTENTIAL FLAW: If the path to the library is not specified, an attacker may be able to
          * replace his own file with the intended library */
-        hModule = LoadLibraryA(data);
-        if (hModule != NULL)
-        {
-            FreeLibrary(hModule);
+        if (strcmp(data, ""))
+            hModule = dlopen(data, RTLD_LAZY | RTLD_GLOBAL);
+        if (hModule != NULL) {
+            dlclose(hModule);
             printf("Library loaded and freed successfully\n");
-        }
-        else
-        {
+        } else {
             printf("Unable to load library\n");
         }
     }
 }
-
 
 
 /* goodG2B uses the GoodSource with the BadSink */
-static void goodG2B()
-{
-    char* data;
+static void goodG2B() {
+    char *data;
     char dataBuffer[100] = "";
     data = dataBuffer;
     /* FIX: Specify the full pathname for the library */
-    strcpy(data, "C:\\Windows\\System32\\winsrv.dll");
+    strcpy(data, "/usr/lib/libhandle.so.1");
     {
-        HMODULE hModule;
+        void *hModule = NULL;
         /* POTENTIAL FLAW: If the path to the library is not specified, an attacker may be able to
          * replace his own file with the intended library */
-        hModule = LoadLibraryA(data);
-        if (hModule != NULL)
-        {
-            FreeLibrary(hModule);
+        hModule = dlopen(data, RTLD_LAZY | RTLD_GLOBAL);
+        if (hModule != NULL) {
+            dlclose(hModule);
             printf("Library loaded and freed successfully \n");
-        }
-        else
-        {
+        } else {
             printf("Unable to load library\n");
         }
     }
 }
 
-void CWE114_Process_Control__w32_char_file_01_good()
-{
+void CWE114_Process_Control__w32_char_file_01_good() {
     goodG2B();
 }
-
 
 
 /* Below is the main(). It is only used when building this testcase on
@@ -106,10 +86,9 @@ void CWE114_Process_Control__w32_char_file_01_good()
 
 
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
     /* seed randomness */
-    srand((unsigned)time(NULL));
+    srand((unsigned) time(NULL));
     printf("Calling good()... \n");
     CWE114_Process_Control__w32_char_file_01_good();
     printf("Finished good() \n");
@@ -119,4 +98,3 @@ int main(int argc, char* argv[])
     printf("Finished bad() \n");
     return 0;
 }
-
