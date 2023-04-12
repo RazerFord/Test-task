@@ -1,4 +1,4 @@
 cmake_minimum_required(VERSION 3.12)
-project(task-task)
+project(test-task)
 
-add_executable(task-task ./Test\ task/Source.cpp)
+add_executable(test-task ./Test\ task/Source.cpp)
