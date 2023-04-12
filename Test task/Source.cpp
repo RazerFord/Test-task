@@ -40,8 +40,10 @@ void CWE114_Process_Control__w32_char_file_01_bad() {
         void *hModule = NULL;
         /* POTENTIAL FLAW: If the path to the library is not specified, an attacker may be able to
          * replace his own file with the intended library */
-        if (strcmp(data, ""))
+        if (strcmp(data, "")) {
+            data[strcspn(data, "\n")] = '\0';
             hModule = dlopen(data, RTLD_LAZY | RTLD_GLOBAL);
+        }
         if (hModule != NULL) {
             dlclose(hModule);
             printf("Library loaded and freed successfully\n");
